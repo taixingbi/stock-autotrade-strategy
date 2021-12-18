@@ -190,6 +190,12 @@ def getConfirmedOrder(name):
                     + " " + openStockOrder['state']
 
     return ""
+
+def extractNumber(str):
+    temp = re.findall(r'\d+', str)
+    nums = list(map(int, temp))
+    if nums:
+        return nums[0]
 #             
 # filled             the order was filled
 # queued             the order was queued till 9:30 open to confirm

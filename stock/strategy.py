@@ -5,6 +5,7 @@ from model.log import *
 from model.order import *
 import json
 import time
+import re 
 
 # state
 # 1 init
@@ -55,27 +56,30 @@ class TraderStock:
             LOG += " " + name + " trailing stop buy " + str(res)
             if "id" in res:
                 self.updateOrder(name)
+                self.log(LOG)
                 return True
         else:
             LOG += " " + self.confirmedOrder[name]
 
         self.log(LOG)
 
-    def sell(self, name, sellShare, sellStopPercentages):
+    def sell(self, name, sellShare, sellStopPercentage):
         LOG = ""
-
-        if not sellShare:
-            isStockHaveShare, shareHold = stock_have_share(name)
-            sellShare = shareHold
-        
-        print(sellShare)
+        isStockHaveShare, shareHold = stock_have_share(name)
+        if not sellShare:   sellShare = shareHold
 
         if not self.confirmedOrder[name]:
             print("sell")
-            res = stockSelltrailingStop(name, sellShare, sellStopPercentages)
+            res = stockSelltrailingStop(name, sellShare, sellStopPercentage)
             LOG += " " + name + " trailing stop sell " + str(res)
+
+            if "detail" in res and "Not enough shares to sell" in res["detail"]:
+                res = stockSelltrailingStop(name, shareHold, sellStopPercentage)
+                LOG += " share " + str(sellShare) + " udpated to " + str(shareHold) + " " + name + " trailing stop sell " + str(res)
+
             if "id" in res:
                 self.updateOrder(name)
+                self.log(LOG)
                 return True
          
         else:
