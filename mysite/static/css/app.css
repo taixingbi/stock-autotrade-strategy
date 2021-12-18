@@ -1,0 +1,84 @@
+body {
+  background-color: #FFFAFA;
+}
+
+.float-container {
+  /* border: 3px solid rgb(192, 58, 58); */
+  padding: 20px;
+  overflow:hidden;
+  background-color: black;
+  color: white
+}
+
+.float-child-left {
+  width: 40%;
+  float: left;
+  padding-right: 3px;
+  /* border: 2px solid red; */
+} 
+
+.float-child-right {
+  width: 60%;
+  float: right;
+  padding-left: 3px;
+  /* border: 2px solid red; */
+} 
+
+.button-active {
+  /* box-shadow: 0 8px 16px 0 rgba(64, 72, 184, 0.2), 0 6px 20px 0 rgba(48, 146, 81, 0.19); */
+}
+
+.button-inactive {
+  box-shadow: 0 8px 16px 0 white, 0 6px 20px 0 white;
+}
+
+.input-active {
+  border-radius: 10%;
+  width: 100%;
+  color: green;
+}
+
+.input-inactive {
+  border-radius: 10%;
+  width: 100%;
+  color: black;
+}
+
+.table-active {
+  table-layout:fixed;
+} 
+
+.table-inactive {
+  table-layout:fixed;
+} 
+
+.stock-active {
+  width: 12%;
+} 
+
+.stock-inactive {
+  opacity: 0.6;
+  text-align: center; 
+  width: 12%;
+} 
+
+.price-active {
+  width: 25%;
+  text-align: center; 
+  color: rgb(223, 13, 153);
+} 
+
+.price-inactive {
+  width: 25%;
+  opacity: 0.4;
+  color:black;
+} 
+
+.item-active {
+  color: green;
+} 
+
+.item-inactive {
+  opacity: 0.6;
+  color:black;
+}

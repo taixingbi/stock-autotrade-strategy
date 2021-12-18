@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <table >
+
+  {% for name, sellShare, sellStopPercentage, buyShare, buyStopPercentage, active, price in stocks %}
+
+  <!-- <table class="table-active{% if not active %} table-inactive {% endif %}"> -->
+    <tr>
+      <!-- <td style="color:green">  {{active}}  </td>   -->
+
+      <td class="stock-active{% if not active %} stock-inactive {% endif %}">
+        <form 
+        class="button-active{% if not active %} button-inactive {% endif %}"
+
+        action="/order/" method="post">
+          {% csrf_token %}
+          <input  
+          class="input-active{% if not active %} input-inactive {% endif %}"
+
+          type="submit" name = "active" value={{name}} >
+        </form>
+      </td>  
+      
+      <td class="price-active{% if not active %} price-inactive {% endif %}">
+        ${{price}}
+      </td>  
+
+      <td>
+        &nbsp | &nbsp 
+        <span style="opacity:0.4">
+          SELL
+        </span>  
+        <span class="item-active{% if not active %} item-inactive {% endif %}">
+          share  {{sellShare}}
+        </span> 
+        <span class="item-active{% if not active %} item-inactive {% endif %}">
+          stop  {{sellStopPercentage}}%
+        </span>   
+      </td> 
+      
+      {% if buyShare > 0 %}
+      <td> 
+        &nbsp | &nbsp<span style="opacity:0.4">BUY</span>  
+        <span class="item-active{% if not active %} item-inactive {% endif %}">
+          Share {{buyShare}}
+        </span>   
+      </td>  
+      <td class="item-active{% if not active %} item-inactive {% endif %}">
+        &nbsp stop {{buyStopPercentage}}%  
+      </td>  
+      {% endif %}
+    </tr>
+    {% endfor %}
+  </table>
+
+  <hr>
+
+  <div class="float-container">
+      {% if logs %}
+        {% for log in logs %}
+          <p  style="font-size:10px;" > {{log}} <p>
+        {% endfor %}
+      {% endif %}    
+  </div>
+
+{% endblock %}
+
+
