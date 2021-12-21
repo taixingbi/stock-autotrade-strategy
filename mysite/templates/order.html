@@ -3,12 +3,11 @@
 {% block content %}
   <table >
 
-  {% for name, sellShare, sellStopPercentage, buyShare, buyStopPercentage, active, price in stocks %}
+  {% for name, sellShare, sellStopPercentage, buyShare, buyStopPercentage, active, mode, price in stocks %}
 
   <!-- <table class="table-active{% if not active %} table-inactive {% endif %}"> -->
     <tr>
       <!-- <td style="color:green">  {{active}}  </td>   -->
-
       <td class="stock-active{% if not active %} stock-inactive {% endif %}">
         <form 
         class="button-active{% if not active %} button-inactive {% endif %}"
@@ -17,9 +16,18 @@
           {% csrf_token %}
           <input  
           class="input-active{% if not active %} input-inactive {% endif %}"
-
           type="submit" name = "active" value={{name}} >
         </form>
+      </td> 
+
+      <td>
+          {% if mode == "strategy1" %}
+            buy&sell
+          {% endif %}
+
+          {% if mode == "strategy2" %}
+            sell all
+          {% endif %}
       </td>  
       
       <td class="price-active{% if not active %} price-inactive {% endif %}">
@@ -39,7 +47,7 @@
         </span>   
       </td> 
       
-      {% if buyShare > 0 %}
+      {% if mode != "strategy2" %}
       <td> 
         &nbsp | &nbsp<span style="opacity:0.4">BUY</span>  
         <span class="item-active{% if not active %} item-inactive {% endif %}">

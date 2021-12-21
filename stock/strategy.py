@@ -48,49 +48,36 @@ class TraderStock:
     def updateOrder(self, name):
         self.confirmedOrder[name] = getConfirmedOrder(name)
 
-    def buy(self, name, buyShare, buyStopPercentage):
-        LOG = ""
-        if not self.confirmedOrder[name]:
-            print("buy")
-            res = stockBuytrailingStop(name, buyShare, buyStopPercentage)
-            LOG += " " + name + " trailing stop buy " + str(res)
-            if "id" in res:
+    def buy(self, name, share, StopPercentage):
+        confirmedOrder = self.confirmedOrder[name]
+        LOG = confirmedOrder
+        if not confirmedOrder:
+            success, log = stockBuytrailingStop(name, share, StopPercentage)
+            LOG += log
+            if success:
                 self.updateOrder(name)
                 self.log(LOG)
                 return True
-        else:
-            LOG += " " + self.confirmedOrder[name]
 
         self.log(LOG)
 
-    def sell(self, name, sellShare, sellStopPercentage):
-        LOG = ""
-        isStockHaveShare, shareHold = stock_have_share(name)
-        if not sellShare:   sellShare = shareHold
-
-        if not self.confirmedOrder[name]:
-            print("sell")
-            res = stockSelltrailingStop(name, sellShare, sellStopPercentage)
-            LOG += " " + name + " trailing stop sell " + str(res)
-
-            if "detail" in res and "Not enough shares to sell" in res["detail"]:
-                res = stockSelltrailingStop(name, shareHold, sellStopPercentage)
-                LOG += " share " + str(sellShare) + " udpated to " + str(shareHold) + " " + name + " trailing stop sell " + str(res)
-
-            if "id" in res:
+    def sell(self, name, share, StopPercentage):
+        confirmedOrder = self.confirmedOrder[name]
+        LOG = confirmedOrder
+        if not confirmedOrder:
+            success, log = stockSelltrailingStop(name, share, StopPercentage)
+            LOG += log
+            if success: 
                 self.updateOrder(name)
                 self.log(LOG)
                 return True
-         
-        else:
-            LOG += " " + self.confirmedOrder[name]
-
-        if sellShare == 0: LOG += " SELL ALL"
 
         self.log(LOG)
 
-    def activeOrder1(self, name, sellShare, sellStopPercentage, buyShare, buyStopPercentage):
+    def strategy1(self, name, sellShare, sellStopPercentage, buyShare, buyStopPercentage):
         state = self.getState(name)
+        print("state", state)
+
         if state=="buy": 
             if self.buy(name, buyShare, buyStopPercentage):
                 self.setState(name, "sell")
@@ -99,11 +86,13 @@ class TraderStock:
             if self.sell(name, sellShare, sellStopPercentage):
                 self.setState(name, "buy")
 
-    def activeOrder2(self, name, sellShare, sellStopPercentage):
+    def strategy2(self, name, sellShare, sellStopPercentage):
         self.sell(name, sellShare, sellStopPercentage)
 
-    def ipoOrder(self):
+    def strategy3(self, name, sellShare, sellStopPercentage, buyShare, buyStopPercentage): # ipo
         print("ipoOrder")
+        self.sell(name, sellShare, sellStopPercentage)
+        self.buy(name, buyShare, buyStopPercentage)
 
 
     def process(self):
@@ -111,10 +100,15 @@ class TraderStock:
         print("\n" + self.timenow)
 
         stocks = self.updateStock()
-        for name, sellShare, sellStopPercentage, buyShare, buyStopPercentage, active in stocks:
+        for name, sellShare, sellStopPercentage, buyShare, buyStopPercentage, active, mode in stocks:
             self.updateOrder(name)
             if active: 
-                if buyShare > 0: self.activeOrder1(name, sellShare, sellStopPercentage, buyShare, buyStopPercentage)
-                if buyShare == 0: self.activeOrder2(name, sellShare, sellStopPercentage)
+                # buy sell rotate
+                if mode == "strategy1": self.strategy1(name, sellShare, sellStopPercentage, buyShare, buyStopPercentage)
+                # sell all
+                if mode == "strategy2": self.strategy2(name, sellShare, sellStopPercentage)
+                # ipo  1. sell all always 2. buy all 
+                if mode == "strategy3": self.strategy3(name, sellShare, sellStopPercentage, buyShare, buyStopPercentage)
+
             else: 
-                if name in self.state: self.state[name]
+                self.setState(name, "buy")

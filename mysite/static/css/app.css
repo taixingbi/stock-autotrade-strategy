@@ -24,10 +24,6 @@ body {
   /* border: 2px solid red; */
 } 
 
-.button-active {
-  /* box-shadow: 0 8px 16px 0 rgba(64, 72, 184, 0.2), 0 6px 20px 0 rgba(48, 146, 81, 0.19); */
-}
-
 .button-inactive {
   box-shadow: 0 8px 16px 0 white, 0 6px 20px 0 white;
 }

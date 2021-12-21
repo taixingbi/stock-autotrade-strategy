@@ -2,7 +2,7 @@
 # https://readthedocs.org/projects/robin-stocks/downloads/pdf/latest/
 from datetime import datetime
 from pytz import timezone
-
+import re
 from yahoo_fin import stock_info as si
 import cryptocompare
 
@@ -113,32 +113,61 @@ def stock_sell(name, share):
                                 jsonify=True)
     print(res)
 
+# test cases
+# sell 0/-1 share
+# sell 3 share
+# sell 3 share with api name
+# sell 99999 share
 def stockSelltrailingStop(name, share, percentage):
-    try:
-        res = rs.orders.order_sell_trailing_stop(   name, 
-                                                    share, 
-                                                    percentage,
-                                                    trailType= 'percentage',
-                                                    timeInForce= 'gtc', 
-                                                    extendedHours= False,
-                                                    jsonify=True)
-        print(res)
-        return res
-    except: 
-        return "order_sell_trailing_stop " + name + " does not exist" 
+    LOG = " " + name + " trailing stop sell" 
+    if share <= 0 :
+        return False, LOG + " share should be greater than 0"
 
-def stockBuytrailingStop(name, share, percentage):
+    res = " "
     try:
-        res = rs.orders.order_buy_trailing_stop(    name, 
-                                                    share, 
-                                                    percentage,
-                                                    trailType= 'percentage',
-                                                    timeInForce= 'gtc', 
-                                                    extendedHours= False,
-                                                    jsonify=True)
-        return res
-    except:
-        return "order_buy_trailing_stop " + name + " does not exist" 
+        res = rs.orders.order_sell_trailing_stop(name, share, percentage, trailType= 'percentage', timeInForce= 'gtc', extendedHours= False, jsonify=True)
+    except: 
+        LOG += " have not start trading yet " + str(res)
+        return False, LOG
+
+    if "detail" in res and "Not enough shares to sell" in res["detail"]: #{'detail': 'Not enough shares to sell.'}
+        isStockHaveShare, shareHold = stock_have_share(name)
+        LOG += " share " + str(share) + " udpated to " + str(shareHold) + " " + str(res)
+        success_, LOG_ = stockSelltrailingStop(name, shareHold, percentage)
+        LOG = LOG_ + LOG
+        print(LOG)
+        return success_, LOG
+
+    if "id" in res:
+        return True, LOG
+
+# test cases
+# buy 0/-1 share
+# buy 3 share
+# buy 3 share with api name
+# buy 99999 share
+def stockBuytrailingStop(name, share, percentage):
+    LOG = " " + name + " trailing stop buy" 
+    if share <=0 :
+        return False, LOG + " share should be greater than 0"
+
+    res = " "
+    try:
+        res = rs.orders.order_buy_trailing_stop(name, share, percentage, trailType= 'percentage', timeInForce= 'gtc', extendedHours= False, jsonify=True)
+    except: 
+        LOG += " have not start trading yet " + str(res)
+        return False, LOG
+
+    if "detail" in res and "You can only purchase" in res["detail"]: # {'detail': 'You can only purchase 47 shares of UVXY.'}
+        maxShare = extractNumber(res['detail']) 
+        LOG += " share " + str(share) + " udpated to " + str(maxShare) + " " + str(res)
+        success_, LOG_ = stockBuytrailingStop(name, maxShare, percentage)
+        LOG = LOG_ + LOG
+        print(LOG)
+        return success_, LOG
+
+    if "id" in res:
+        return True, LOG 
 
 
 # triger a market buy order if stock rises to
@@ -212,5 +241,4 @@ def getallOpenStockOrders():
 # ----------------------- triger -----------------------
 
 if __name__ == "__main__":
-    res = stockSelltrailingStop("UVXYA", 1000000000, 1)
-    print(res)
+    print(extractNumber())

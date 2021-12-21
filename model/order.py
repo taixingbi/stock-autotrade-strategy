@@ -2,6 +2,22 @@ from django.db import models
 
 class Order(models.Model):
     name = models.CharField(max_length=255)
+
+    strategy1 = "strategy1"
+    strategy2 = "strategy2"
+    strategy3 = "strategy3"
+
+    choices = [
+        (strategy1, "strategy1"),
+        (strategy2, "strategy2"),
+        (strategy3, "strategy3"),
+    ]
+    mode = models.CharField(
+        max_length= 255,
+        choices= choices,
+        default= strategy1,
+    )
+
     active = models.BooleanField(default=False)
     sell_share = models.IntegerField(default=0)
     buy_share = models.IntegerField(default=0)
@@ -24,13 +40,14 @@ class Order_crud:
         all_entries = Order.objects.all()
         names = all_entries.values_list('name', flat=True)
         active = all_entries.values_list('active', flat=True)
+        mode = all_entries.values_list('mode', flat=True)
         buyStopPercentages = all_entries.values_list('buy_stop_percentage', flat=True)
         buyShares = all_entries.values_list('buy_share', flat=True)
 
         sellStopPercentages = all_entries.values_list('sell_stop_percentage', flat=True)
         sellShares = all_entries.values_list('sell_share', flat=True)
 
-        allRecords = tuple(zip(names, sellShares, sellStopPercentages, buyShares, buyStopPercentages, active))
+        allRecords = tuple(zip(names, sellShares, sellStopPercentages, buyShares, buyStopPercentages, active, mode))
         return allRecords
 
     def update(self, name):
